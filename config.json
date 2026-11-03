@@ -1,0 +1,9 @@
+{
+    "allowed_ips": [],
+    "blocked_ips": [],
+    "domains": [],
+    "remove_others": true,
+    "remove_allow_any": true,
+    "protocol": "tcp",
+    "port": 22
+}
