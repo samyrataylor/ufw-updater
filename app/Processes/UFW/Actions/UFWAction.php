@@ -34,9 +34,6 @@ abstract class UFWAction extends UFW
 
     protected function guessAction(): string
     {
-        return $this
-                |> class_basename(...)
-                |> Str::snake(...)
-                |> (fn(string $name) => Str::replace('_', ' ', $name));
+        return Str::replace('_', ' ', Str::snake(class_basename($this)));
     }
 }
