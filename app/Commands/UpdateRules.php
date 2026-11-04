@@ -3,10 +3,11 @@
 namespace App\Commands;
 
 use App\Processes\Dig;
+use App\Resources\FirewallRule;
 use App\Services\Firewall;
+use App\Tasks\LoadFirewall;
 use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
-
 
 class UpdateRules extends Command
 {
@@ -23,46 +24,87 @@ class UpdateRules extends Command
      * @var string
      */
     protected $description = 'Command description';
-    protected Firewall $firewall;
+    protected(set) Firewall $firewall;
+    protected(set) array $allowed = [];
+    protected(set) array $domains = [];
 
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $this->task('Loading firewall', fn() => $this->firewall = new Firewall());
         $this->output->writeln('Found '.count($this->firewall->rules()).' firewall rule(s)');
 
-        if(count($this->firewall->rules())) {
-            $this->task(
-                'Removing existing rules',
-                fn() => $this->removeRules());
+        if(config('settings.remove_allow_any')) {
+            $this->removeAllowAny();
         }
 
-        $allowed = config('settings.allowed_ips');
-        $domains = config('settings.domains');
-
-        foreach($allowed as $ip) {
-            $this->task(
-                'Adding allowed IP '.$ip,
-                fn() => $this->firewall->allow($ip)
-            );
+        if(config('settings.remove_others')) {
+            $this->removeOthers();
         }
 
-        foreach($domains as $domain) {
-            $this->task(
-                'Adding IP for '.$domain,
-                fn() => $this->firewall->allow(Dig::make($domain)->run())
-            );
+        $this->handleAllowList();
+        $this->handleDomains();
 
-        }
-
+        $this->output->success('Completed');
     }
 
-    private function removeRules(): void
+    private function handleAllowList(): void
     {
-        foreach($this->firewall->rules() as $rule) {
-            $this->firewall->removeRule($rule);
+        $this->task('Loading allowed IPs', fn() => $this->allowed = config('settings.allowed_ips'));
+        $this->output->writeln('Found '.count($this->allowed).' allowed IP(s)');
+
+        foreach ($this->allowed as $ip) {
+            $this->task('Adding IP '.$ip, fn() => $this->firewall->allow($ip));
+        }
+    }
+
+    private function handleDomains(): void
+    {
+        $this->task('Loading domains', fn() => $this->domains = config('settings.domains'));
+        $this->output->writeln('Found '.count($this->domains).' domain(s)');
+
+        foreach ($this->domains as $domain) {
+            $ip = null;
+
+            $this->task('Getting IP from '.$domain, function () use (&$ip, $domain) {
+                $ip = Dig::make($domain)->run();
+            });
+
+            if(!$ip) {
+                $this->output->writeln('<error>'.$domain.' failed to resolve.</error>');
+                continue;
+            }
+            $this->output->writeln('<info>'.$domain.' => '.$ip.'</info>');
+            $this->task('Adding IP '.$ip, fn() => $this->firewall->allow($ip));
+        }
+    }
+
+    private function removeRule(FirewallRule $rule): void
+    {
+        $this->task('Removing rule '.$rule->number, fn() => $this->firewall->removeRule($rule));
+    }
+
+    private function removeOthers(): void
+    {
+        $this->output->writeln('Found '.count($this->firewall->rules()).' other rule(s)');
+        foreach ($this->firewall->rules() as $rule) {
+            $this->task('Removing rule '.$rule->number, fn() => $this->firewall->removeRule($rule));
+        }
+    }
+
+    private function removeAllowAny(): void
+    {
+        $rules = null;
+        $firewall = $this->firewall;
+        $this->task('Finding rules with source "any"', function () use (&$rules, $firewall) {
+            $rules = $firewall->rules()->where('source', 'any')->values();
+        });
+        $this->output->writeln('Found '.count($rules).' rule(s) from source "any"');
+
+        foreach($rules as $rule) {
+            $this->removeRule($rule);
         }
     }
 

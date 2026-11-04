@@ -56,7 +56,12 @@ class Allow extends UFWAction
 
     public function source(string $source): static
     {
-        if(preg_match('/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/', $source)) {
+        $matched = preg_match(
+            '/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:\/(?:3[0-2]|[0-2]?[0-9]?))?$/',
+            $source
+        );
+
+        if($matched) {
             $this->source = $source;
         }
         return $this;

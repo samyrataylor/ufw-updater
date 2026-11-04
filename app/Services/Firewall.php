@@ -27,6 +27,9 @@ class Firewall
         return collect($rules)->mapInto(FirewallRule::class);
     }
 
+    /**
+     * @return Collection<array-key, FirewallRule>
+     */
     public function rules(): Collection
     {
         return $this->rules->where('port', config('settings.port'))
