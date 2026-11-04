@@ -2,14 +2,12 @@
 
 namespace App\Services;
 
-use App\Config\Config;
 use App\Processes\SystemProcess;
 use App\Processes\UFW\Actions\Allow;
 use App\Processes\UFW\Actions\Remove;
 use App\Processes\UFW\Actions\StatusNumbered;
 use App\Resources\FirewallRule;
 use App\Types\Protocol;
-use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Collection;
 
 class Firewall
@@ -19,11 +17,8 @@ class Firewall
      */
     protected(set) Collection $rules;
 
-    protected(set) Config $config;
-
     public function __construct()
     {
-        $this->config = Config::make();
         $this->loadRules();
     }
 
@@ -34,8 +29,8 @@ class Firewall
 
     public function rules(): Collection
     {
-        return $this->rules->where('port', $this->config->get('port'))
-                           ->where('protocol', $this->config->get('protocol'))
+        return $this->rules->where('port', config('settings.port'))
+                           ->where('protocol', config('settings.protocol'))
                            ->values();
     }
 
@@ -55,7 +50,7 @@ class Firewall
     public function allow(string $source, ?int $port = null, ?Protocol $protocol = null): bool
     {
         return $this->processHook(
-            Allow::make($source, $port ?? $this->config->get('port'), $protocol ?? $this->config->get('protocol'))
+            Allow::make($source, $port ?? config('settings.port'), $protocol ?? config('settings.protocol'))
         );
     }
 

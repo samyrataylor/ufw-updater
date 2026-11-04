@@ -3,7 +3,6 @@
 namespace App\Processes\UFW;
 
 use App\Processes\SystemProcess;
-use Illuminate\Support\Arr;
 
 abstract class UFW extends SystemProcess
 {

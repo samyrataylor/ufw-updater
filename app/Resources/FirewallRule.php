@@ -2,9 +2,6 @@
 
 namespace App\Resources;
 
-use App\Processes\UFW\Actions\Allow;
-use App\Processes\UFW\Actions\Remove;
-use App\Services\Firewall;
 use App\Types\Protocol;
 
 class FirewallRule

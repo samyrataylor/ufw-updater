@@ -2,12 +2,11 @@
 
 use App\Types\Protocol;
 
+/*
+ * Don't edit this file, values are here for IDE completion but are pulled from config.json
+ */
 return [
-    'use_json_config' => env('USE_JSON_CONFIG', true),
-
-    'overwrite_json' => env('OVERWRITE_JSON_CONFIG', true),
-
-    'json_config_file' => env('JSON_CONFIG_FILE', base_path('config.json')),
+    'loaded' => false,
 
     'allowed_ips' => [],
 
@@ -15,11 +14,11 @@ return [
 
     'domains' => [],
 
-    'remove_others' => env('REMOVE_OTHERS', true),
+    'remove_others' => false,
 
-    'remove_allow_any' => env('REMOVE_ALLOW_ANY', true),
+    'remove_allow_any' => false,
 
-    'protocol' => Protocol::from(env('PROTOCOL', 'tcp')),
+    'protocol' => Protocol::Empty(),
 
-    'port' => env('PORT', 22),
+    'port' => 22,
 ];

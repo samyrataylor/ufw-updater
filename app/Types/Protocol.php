@@ -3,8 +3,11 @@
 namespace App\Types;
 
 use App\Enums\ProtocolType;
+use Illuminate\Contracts\Support\Jsonable;
 use Stringable;
-class Protocol implements Stringable
+
+
+class Protocol implements Stringable, Jsonable
 {
     protected function __construct(
         protected(set) ProtocolType $protocol,
@@ -60,6 +63,11 @@ class Protocol implements Stringable
     }
 
     public function __toString(): string
+    {
+        return $this->toString();
+    }
+
+    public function toJson($options = 0): string
     {
         return $this->toString();
     }

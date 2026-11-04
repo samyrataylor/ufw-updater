@@ -2,12 +2,9 @@
 
 namespace App\Commands;
 
-use App\Config\Config;
 use App\Processes\Dig;
 use App\Services\Firewall;
-use App\Types\Protocol;
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Support\Facades\Process;
 use LaravelZero\Framework\Commands\Command;
 
 
@@ -26,8 +23,6 @@ class UpdateRules extends Command
      * @var string
      */
     protected $description = 'Command description';
-
-    protected Config $config;
     protected Firewall $firewall;
 
     /**
@@ -35,7 +30,6 @@ class UpdateRules extends Command
      */
     public function handle()
     {
-        $this->task('Loading config', fn() => $this->config = new Config());
         $this->task('Loading firewall', fn() => $this->firewall = new Firewall());
         $this->output->writeln('Found '.count($this->firewall->rules()).' firewall rule(s)');
 
@@ -45,8 +39,8 @@ class UpdateRules extends Command
                 fn() => $this->removeRules());
         }
 
-        $allowed = $this->config->get('allowed_ips');
-        $domains = $this->config->get('domains');
+        $allowed = config('settings.allowed_ips');
+        $domains = config('settings.domains');
 
         foreach($allowed as $ip) {
             $this->task(
