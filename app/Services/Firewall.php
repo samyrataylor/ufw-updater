@@ -9,6 +9,7 @@ use App\Processes\UFW\Actions\Remove;
 use App\Processes\UFW\Actions\StatusNumbered;
 use App\Resources\FirewallRule;
 use App\Types\Protocol;
+use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Collection;
 
 class Firewall
@@ -23,17 +24,19 @@ class Firewall
     public function __construct()
     {
         $this->config = Config::make();
+        $this->loadRules();
     }
 
-    public function parseRules(array|Collection $rules): static
+    public static function parseRules(array|Collection $rules): Collection
     {
-        $this->rules = collect($rules)->mapInto(FirewallRule::class);
-        return $this;
+        return collect($rules)->mapInto(FirewallRule::class);
     }
 
     public function rules(): Collection
     {
-        return $this->rules;
+        return $this->rules->where('port', $this->config->get('port'))
+                           ->where('protocol', $this->config->get('protocol'))
+                           ->values();
     }
 
     private function processHook(SystemProcess $process): bool
@@ -56,6 +59,11 @@ class Firewall
         );
     }
 
+    public function removeRule(FirewallRule $rule): bool
+    {
+        return $this->remove($rule->number);
+    }
+
     public function remove(int|string $numOrSource): bool
     {
         if(is_int($numOrSource)) {
@@ -73,16 +81,41 @@ class Firewall
         return false;
     }
 
-    public function refreshRules(): static
+    public function loadRules(): static
+    {
+        $this->rules = static::getRules();
+        return $this;
+    }
+
+    public static function getRules(): Collection
     {
         $process = StatusNumbered::make();
         $output = $process->run();
+
+        if($output === [] && $process->errorOutput() === []) {
+            return static::parseRules([]);
+        }
 
         if($process->failed) {
             throw new \Exception(implode(PHP_EOL, $process->errorOutput()));
         }
 
-        $this->parseRules($output);
+        return static::parseRules($output);
+    }
+
+    public function refreshRules(): static
+    {
+        $rules = static::getRules()->pluck('number', 'name')->toArray();
+
+        foreach($this->rules as $key => $rule) {
+            if(array_key_exists($rule->name, $rules)) {
+                $this->rules[$key] = $rule->updateNumber($rules[$rule->name]);
+            } else {
+                unset($this->rules[$key]);
+            }
+        }
+
+        $this->rules = $this->rules->values();
 
         return $this;
     }

@@ -4,6 +4,7 @@ namespace App\Resources;
 
 use App\Processes\UFW\Actions\Allow;
 use App\Processes\UFW\Actions\Remove;
+use App\Services\Firewall;
 use App\Types\Protocol;
 
 class FirewallRule
@@ -15,6 +16,8 @@ class FirewallRule
     protected(set) string $direction;
     protected(set) string $source;
     protected(set) bool $v6;
+    protected(set) ?string $raw = null;
+    protected(set) ?string $name = null;
 
     public function __construct(string|array $rule)
     {
@@ -25,8 +28,21 @@ class FirewallRule
         }
 
         if(is_string($rule)) {
+            $this->raw = $rule;
+            $this->name = static::parseName($rule);
             $this->parse($rule);
         }
+    }
+
+    public function updateNumber(int $number): static
+    {
+        $this->number = $number;
+        return $this;
+    }
+
+    public static function parseName(string $raw): string
+    {
+        return preg_replace('/^\[ *(\d)+] /', '', $raw);
     }
 
     private function parse(string $rule): void
@@ -63,15 +79,5 @@ class FirewallRule
         if ($this->source === 'Anywhere') {
             $this->source = 'any';
         }
-    }
-
-    public function toAllowProcess(): Allow
-    {
-        return new Allow($this->source, $this->port, $this->protocol);
-    }
-
-    public function toRemoveProcess(): Remove
-    {
-        return new Remove($this->number);
     }
 }

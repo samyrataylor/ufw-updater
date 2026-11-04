@@ -18,7 +18,8 @@
     "require": {
         "php": "^8.3",
         "laravel-zero/foundation": "^13.23",
-        "laravel-zero/framework": "^13.0"
+        "laravel-zero/framework": "^13.0",
+        "laravel/tinker": "^3.0@dev"
     },
     "require-dev": {
         "laravel/pint": "^1.30.4",
@@ -46,6 +47,6 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true,
+    "prefer-stable": false,
     "bin": ["ufw-updater"]
 }
