@@ -40,6 +40,12 @@ jobs:
     - name: Build Release
       run: php ufw-updater app:build --build-version=unreleased
 
+    - name: Upload Build
+      uses: actions/upload-artifact@v7
+      with:
+        name: 'ufw-updater'
+        path: '/home/runner/work/ufw-updater/ufw-updater/builds/ufw-updater'
+
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
