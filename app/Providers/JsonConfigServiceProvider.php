@@ -60,7 +60,7 @@ class JsonConfigServiceProvider extends ServiceProvider
 
     protected function configFile(): string
     {
-        return base_path('config.json');
+        return './config.json';
     }
 
     protected function defaultConfig(): array
