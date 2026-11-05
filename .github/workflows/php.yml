@@ -37,7 +37,7 @@ jobs:
       run: composer install --prefer-dist --no-progress
 
     - name: Build Release
-      run: php ufw-updater app:build --build-version=${{ github.ref }}
+      run: php ufw-updater app:build --build-version=${{ github.ref_name }}
 
     - name: Upload Build
       uses: actions/upload-artifact@v7
