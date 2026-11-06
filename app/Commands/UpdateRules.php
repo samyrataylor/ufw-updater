@@ -91,7 +91,7 @@ class UpdateRules extends Command
     {
         $this->output->writeln('Found '.count($this->firewall->rules()).' other rule(s)');
         foreach ($this->firewall->rules() as $rule) {
-            $this->task('Removing rule '.$rule->number, fn() => $this->firewall->removeRule($rule));
+            $this->removeRule($rule);
         }
     }
 
