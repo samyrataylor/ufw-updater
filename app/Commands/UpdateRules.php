@@ -84,7 +84,7 @@ class UpdateRules extends Command
 
     private function removeRule(FirewallRule $rule): void
     {
-        $this->task('Removing rule '.$rule->number, fn() => $this->firewall->removeRule($rule));
+        $this->task('Removing rule '.$rule->name ?? '', fn() => $this->firewall->removeRule($rule));
     }
 
     private function removeOthers(): void
