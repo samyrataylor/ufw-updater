@@ -12,11 +12,11 @@ enum ProtocolType: string
 
     public function is(string|self|null $type): bool
     {
-        if($type instanceof self) {
+        if ($type instanceof self) {
             return $this === $type;
         }
 
-        if(empty($type)) {
+        if (empty($type)) {
             $type = 'empty';
         }
 

@@ -14,36 +14,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.4'
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
 
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
+      - name: Validate composer.json and composer.lock
+        run: composer validate --strict
 
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
 
-    - name: Build Release
-      run: php ufw-updater app:build --build-version=${{ github.ref_name }}
+      - name: Build Release
+        run: php ufw-updater app:build --build-version=${{ github.ref_name }}
 
-    - name: Upload Build
-      uses: actions/upload-artifact@v7
-      with:
-        name: 'ufw-updater'
-        path: '/home/runner/work/ufw-updater/ufw-updater/builds/ufw-updater'
+      - name: Upload Build
+        uses: actions/upload-artifact@v7
+        with:
+          name: 'ufw-updater'
+          path: '/home/runner/work/ufw-updater/ufw-updater/builds/ufw-updater'
 
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md

@@ -12,15 +12,15 @@ class Allow extends UFWAction
 
     public function __construct(?string $source = null, ?int $port = null, ?Protocol $protocol = null)
     {
-        if(!is_null($source)) {
+        if (!is_null($source)) {
             $this->source($source);
         }
 
-        if(!is_null($port)) {
+        if (!is_null($port)) {
             $this->port($port);
         }
 
-        if(!is_null($protocol)) {
+        if (!is_null($protocol)) {
             $this->protocol($protocol);
         }
     }
@@ -33,15 +33,15 @@ class Allow extends UFWAction
     public function actionPlaceholders(): array
     {
         return [
-            'source' => $this->source ?? 'any',
-            'port' => $this->port ?? 22,
+            'source'   => $this->source ?? 'any',
+            'port'     => $this->port ?? 22,
             'protocol' => $this->getProtocol(),
         ];
     }
 
     public function getProtocol(): string
     {
-        if(!isset($this->protocol) || $this->protocol->isEmpty()) {
+        if (!isset($this->protocol) || $this->protocol->isEmpty()) {
             return '';
         }
 
@@ -61,7 +61,7 @@ class Allow extends UFWAction
             $source
         );
 
-        if($matched) {
+        if ($matched) {
             $this->source = $source;
         }
         return $this;

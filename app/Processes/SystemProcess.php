@@ -30,7 +30,7 @@ abstract class SystemProcess
     {
         $command = $this->rawCommand();
 
-        if($this->elevated()) {
+        if ($this->elevated()) {
             $command = 'sudo '.$command;
         }
 
@@ -60,7 +60,7 @@ abstract class SystemProcess
 
     private function updateStatus(): void
     {
-        if(isset($this->processResult)) {
+        if (isset($this->processResult)) {
             $this->hasExecuted = true;
             $this->exitCode = $this->exitCode();
             $this->failed = $this->exitCode !== 0;
@@ -127,7 +127,7 @@ abstract class SystemProcess
 
     private function filterOutput(array|string $output): array
     {
-        if(is_string($output)) {
+        if (is_string($output)) {
             $output = explode(PHP_EOL, $output);
         }
 

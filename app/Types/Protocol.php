@@ -30,9 +30,9 @@ class Protocol implements Stringable, Jsonable
 
     public static function from(string $protocol): static
     {
-        return match(strtolower($protocol)) {
-            'udp' => self::UDP(),
-            'tcp' => self::TCP(),
+        return match (strtolower($protocol)) {
+            'udp'   => self::UDP(),
+            'tcp'   => self::TCP(),
             default => self::Empty(),
         };
     }

@@ -23,7 +23,7 @@ class UpdateRules extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Update UFW rules based on config.json';
     protected(set) Firewall $firewall;
     protected(set) array $allowed = [];
     protected(set) array $domains = [];
@@ -36,11 +36,11 @@ class UpdateRules extends Command
         $this->task('Loading firewall', fn() => $this->firewall = new Firewall());
         $this->output->writeln('Found '.count($this->firewall->rules()).' firewall rule(s)');
 
-        if(config('settings.remove_allow_any')) {
+        if (config('settings.remove_allow_any')) {
             $this->removeAllowAny();
         }
 
-        if(config('settings.remove_others')) {
+        if (config('settings.remove_others')) {
             $this->removeOthers();
         }
 
@@ -68,11 +68,12 @@ class UpdateRules extends Command
         foreach ($this->domains as $domain) {
             $ip = null;
 
-            $this->task('Getting IP from '.$domain, function () use (&$ip, $domain) {
+            $this->task('Getting IP from '.$domain, function () use (&$ip, $domain)
+            {
                 $ip = Dig::make($domain)->run();
             });
 
-            if(!$ip) {
+            if (!$ip) {
                 $this->output->writeln('<error>'.$domain.' failed to resolve.</error>');
                 continue;
             }
@@ -98,12 +99,13 @@ class UpdateRules extends Command
     {
         $rules = null;
         $firewall = $this->firewall;
-        $this->task('Finding rules with source "any"', function () use (&$rules, $firewall) {
+        $this->task('Finding rules with source "any"', function () use (&$rules, $firewall)
+        {
             $rules = $firewall->rules()->where('source', 'any')->values();
         });
         $this->output->writeln('Found '.count($rules).' rule(s) from source "any"');
 
-        foreach($rules as $rule) {
+        foreach ($rules as $rule) {
             $this->removeRule($rule);
         }
     }

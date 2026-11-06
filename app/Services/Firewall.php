@@ -41,10 +41,11 @@ class Firewall
     {
         $process->run();
 
-        if($process->success) {
+        if ($process->success) {
             try {
                 $this->refreshRules();
-            } catch (\Exception) {}
+            } catch (\Exception) {
+            }
         }
 
         return $process->success;
@@ -64,7 +65,7 @@ class Firewall
 
     public function remove(int|string $numOrSource): bool
     {
-        if(is_int($numOrSource)) {
+        if (is_int($numOrSource)) {
             return $this->processHook(
                 Remove::make($numOrSource)
             );
@@ -72,7 +73,7 @@ class Firewall
 
         $rule = $this->rules->where('source', $numOrSource)->first();
 
-        if($rule) {
+        if ($rule) {
             return $this->remove($rule->number);
         }
 
@@ -90,11 +91,11 @@ class Firewall
         $process = StatusNumbered::make();
         $output = $process->run();
 
-        if($output === [] && $process->errorOutput() === []) {
+        if ($output === [] && $process->errorOutput() === []) {
             return static::parseRules([]);
         }
 
-        if($process->failed) {
+        if ($process->failed) {
             throw new \Exception(implode(PHP_EOL, $process->errorOutput()));
         }
 
@@ -105,8 +106,8 @@ class Firewall
     {
         $rules = static::getRules()->pluck('number', 'name')->toArray();
 
-        foreach($this->rules as $key => $rule) {
-            if(array_key_exists($rule->name, $rules)) {
+        foreach ($this->rules as $key => $rule) {
+            if (array_key_exists($rule->name, $rules)) {
                 $this->rules[$key] = $rule->updateNumber($rules[$rule->name]);
             } else {
                 unset($this->rules[$key]);

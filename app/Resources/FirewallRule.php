@@ -18,13 +18,13 @@ class FirewallRule
 
     public function __construct(string|array $rule)
     {
-        if(is_array($rule)) {
+        if (is_array($rule)) {
             foreach ($rule as $key => $value) {
                 $this->$key = $value;
             }
         }
 
-        if(is_string($rule)) {
+        if (is_string($rule)) {
             $this->raw = $rule;
             $this->name = static::parseName($rule);
             $this->parse($rule);
@@ -59,11 +59,11 @@ class FirewallRule
 
         preg_match('/\[ *(\d*)]/', $rule, $matchNumber);
         $rule = str_replace($matchNumber[0], '', $rule);
-        $this->number = (int)$matchNumber[1];
+        $this->number = (int) $matchNumber[1];
 
         preg_match('/ (\d+\/(tcp|udp)) /', $rule, $matchProtoPort);
         $rule = str_replace($matchProtoPort[0], '', $rule);
-        $this->port = (int)explode('/', $matchProtoPort[1])[0];
+        $this->port = (int) explode('/', $matchProtoPort[1])[0];
         $this->protocol = Protocol::from(explode('/', $matchProtoPort[1])[1]);
 
         $rule = trim($rule);
