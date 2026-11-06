@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\JsonBuilder;
 use App\Types\Protocol;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Support\Arr;
@@ -37,14 +38,7 @@ class JsonLoader
 
     public function toJson(int $options = 0): string
     {
-        $jsonable = [];
-        foreach ($this->config() as $key => $value) {
-            if (is_object($value) && class_implements($value, Jsonable::class)) {
-                $value = $value->toJson($options);
-            }
-            $jsonable[$key] = $value;
-        }
-        return json_encode($jsonable, $options);
+        return JsonBuilder::toJson($this->config(), $options);
     }
 
     public function config(): array
