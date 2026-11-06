@@ -63,11 +63,18 @@ class SelfUpdate extends Command
         $this->task('Downloading '.$version, fn() => exec(sprintf('curl -sL "%s" -o ufw-updater-%s', $downloadUrl, $version)));
 
         if (config('app.env') === 'production') {
-            $this->task('Cleaning up old version', function () use ($version)
-            {
-                unlink('ufw-updater');
-                rename('ufw-updater-'.$version, 'ufw-updater');
+            $this->task('Cleaning up old version', function () use ($version) {
+                file_put_contents('.cleanup.sh', implode(PHP_EOL, [
+                    '#!/bin/bash',
+                    'sleep 1',
+                    'rm ufw-updater',
+                    'mv "ufw-updater-'.$version.'" "ufw-updater"',
+                    'chmod +x ufw-updater',
+                    'exit 0',
+                ]));
             });
+
+            exec('bash .cleanup.sh & disown');
         } else {
             $this->error('App not in production, could not auto update');
         }
