@@ -9,6 +9,7 @@ enum ProtocolType: string
     case TCP = 'tcp';
     case UDP = 'udp';
     case Empty = 'empty';
+    case Any = 'any';
 
     public function is(string|self|null $type): bool
     {
@@ -16,8 +17,15 @@ enum ProtocolType: string
             return $this === $type;
         }
 
-        if (empty($type)) {
+        $type = strtolower($type);
+
+        if (empty($type) || $type === 'empty') {
             $type = 'empty';
+        }
+
+
+        if($type === 'anywhere' || $type === '*') {
+            $type = 'any';
         }
 
         try {
@@ -30,6 +38,11 @@ enum ProtocolType: string
     public function isEmpty(): bool
     {
         return $this->is(self::Empty);
+    }
+
+    public function isAny(): bool
+    {
+        return $this->is(self::Any);
     }
 
     public function isTCP(): bool

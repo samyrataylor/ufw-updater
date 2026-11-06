@@ -7,7 +7,7 @@ use App\Types\Protocol;
 class FirewallRule
 {
     protected(set) int $number;
-    protected(set) int $port;
+    protected(set) int|string $port;
     protected(set) Protocol $protocol;
     protected(set) string $policy;
     protected(set) string $direction;
@@ -48,6 +48,7 @@ class FirewallRule
          * Expected input
          * "[ 1] 22/tcp ALLOW IN 172.17.0.0/16 "
          * "[ 1] 22/tcp (v6) ALLOW IN Anywhere (v6) "
+         * "[ 1] Anywhere ALLOW IN Anywhere "
          */
 
         if (str_contains($rule, '(v6)')) {
@@ -61,10 +62,17 @@ class FirewallRule
         $rule = str_replace($matchNumber[0], '', $rule);
         $this->number = (int) $matchNumber[1];
 
-        preg_match('/ (\d+\/(tcp|udp)) /', $rule, $matchProtoPort);
-        $rule = str_replace($matchProtoPort[0], '', $rule);
-        $this->port = (int) explode('/', $matchProtoPort[1])[0];
-        $this->protocol = Protocol::from(explode('/', $matchProtoPort[1])[1]);
+        preg_match('/ ((\d+\/(tcp|udp))|Anywhere) /', $rule, $matchProtoPort);
+
+        if($matchProtoPort[1] === 'Anywhere') {
+            $rule = implode(' ', array_slice(explode(' ', trim($rule)), 1));
+            $this->port = 'any';
+            $this->protocol = Protocol::Any();
+        } else {
+            $rule = str_replace($matchProtoPort[0], '', $rule);
+            $this->port = (int) explode('/', $matchProtoPort[1])[0];
+            $this->protocol = Protocol::from(explode('/', $matchProtoPort[1])[1]);
+        }
 
         $rule = trim($rule);
 
