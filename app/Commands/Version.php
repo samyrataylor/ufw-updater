@@ -26,7 +26,7 @@ class Version extends Command
      */
     public function handle(): void
     {
-        $this->output->writeln(app('git.version'));
+        $this->output->writeln(config('app.version'));
     }
 
     /**
