@@ -2,6 +2,7 @@
 
 namespace App\Commands;
 
+use App\Support\PathBuilder;
 use GuzzleHttp\Client;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Collection;
@@ -60,12 +61,23 @@ class SelfUpdate extends Command
             $downloadUrl = $appAsset->get('browser_download_url');
         });
 
-        $this->task('Downloading '.$version, fn() => exec(sprintf('curl -sL "%s" -o ufw-updater-%s', $downloadUrl, $version)));
+        $this->task(
+            'Downloading '.$version,
+            fn() => exec(
+                sprintf(
+                    'curl -sL "%s" -o %s-%s',
+                    $downloadUrl,
+                    PathBuilder::path('ufw-updater'),
+                    $version
+                )
+            )
+        );
 
         if (config('app.env') === 'production') {
             $this->task('Cleaning up previous version', function () use ($version) {
-                chmod('ufw-updater-'.$version, 0755);
-                register_shutdown_function(fn () => rename('ufw-updater-'.$version, 'ufw-updater'));
+                $file = PathBuilder::path('ufw-updater');
+                chmod($file.'-'.$version, 0755);
+                register_shutdown_function(fn () => rename($file.'-'.$version, $file));
             });
 
             $this->output->success('Successfully updated to version '.$version.'.');
