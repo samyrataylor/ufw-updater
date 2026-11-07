@@ -3,14 +3,14 @@
 namespace App\Services;
 
 use App\Support\JsonBuilder;
+use App\Support\PathBuilder;
 use App\Types\Protocol;
-use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Support\Arr;
 use Throwable;
 
 class JsonLoader
 {
-    protected(set) string $configFile = './config.json';
+    protected(set) string $configFilename = 'config.json';
 
     protected array $fields = [
         'allowed_ips'      => 'array',
@@ -26,30 +26,25 @@ class JsonLoader
         return static::instance()->config();
     }
 
-    public function exists(): bool
-    {
-        return file_exists($this->configFile);
-    }
-
-    public function delete(): bool
-    {
-        return unlink($this->configFile);
-    }
-
-    public function toJson(int $options = 0): string
-    {
-        return JsonBuilder::toJson($this->config(), $options);
-    }
-
     public function config(): array
     {
         if (!$this->exists()) {
             return $this->defaultConfig();
         }
 
-        $config = json_decode(file_get_contents($this->configFile), true);
+        $config = json_decode(file_get_contents($this->configFile()), true);
 
         return $this->validatedItems($config);
+    }
+
+    public function exists(): bool
+    {
+        return file_exists($this->configFile());
+    }
+
+    public function configFile(): string
+    {
+        return PathBuilder::path($this->configFilename);
     }
 
     protected function defaultConfig(): array
@@ -131,10 +126,20 @@ class JsonLoader
         );
 
         try {
-            file_put_contents($this->configFile, json_encode($config, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+            file_put_contents($this->configFile(), json_encode($config, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
             return true;
         } catch (Throwable) {
             return false;
         }
+    }
+
+    public function toJson(int $options = 0): string
+    {
+        return JsonBuilder::toJson($this->config(), $options);
+    }
+
+    public function delete(): bool
+    {
+        return unlink($this->configFile());
     }
 }

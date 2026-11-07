@@ -2,6 +2,7 @@
 
 namespace App\Commands;
 
+use App\Support\PathBuilder;
 use Illuminate\Console\Scheduling\Schedule;
 
 class InstallJob extends AbstractCronCommand
@@ -23,7 +24,7 @@ class InstallJob extends AbstractCronCommand
 
     public function getScript(): string
     {
-        return sprintf('%s/ufw-updater rules:update', getcwd());
+        return sprintf('%s/ufw-updater rules:update', PathBuilder::path());
     }
 
     public function getDefaultSchedule(): string

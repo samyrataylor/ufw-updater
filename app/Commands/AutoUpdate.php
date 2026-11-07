@@ -3,6 +3,8 @@
 namespace App\Commands;
 
 
+use App\Support\PathBuilder;
+
 class AutoUpdate extends AbstractCronCommand
 {
     /**
@@ -22,7 +24,7 @@ class AutoUpdate extends AbstractCronCommand
 
     public function getScript(): string
     {
-        return sprintf('%s/ufw-updater self-update', getcwd());
+        return sprintf('%s/ufw-updater self-update', PathBuilder::path());
     }
 
     public function getDefaultSchedule(): string
