@@ -4,10 +4,13 @@ namespace App\Services;
 
 use App\Processes\SystemProcess;
 use App\Processes\UFW\Actions\Allow;
+use App\Processes\UFW\Actions\Disable;
+use App\Processes\UFW\Actions\Enable;
 use App\Processes\UFW\Actions\Remove;
 use App\Processes\UFW\Actions\StatusNumbered;
 use App\Resources\FirewallRule;
-use App\Types\Protocol;
+use App\Resources\Protocol;
+use Exception;
 use Illuminate\Support\Collection;
 
 class Firewall
@@ -44,7 +47,7 @@ class Firewall
         if ($process->success) {
             try {
                 $this->refreshRules();
-            } catch (\Exception) {
+            } catch (Exception) {
             }
         }
 
@@ -56,6 +59,20 @@ class Firewall
         return $this->processHook(
             Allow::make($source, $port ?? config('settings.port'), $protocol ?? config('settings.protocol'))
         );
+    }
+
+    public function isSupported(FirewallRule $rule): bool
+    {
+        return $rule->policy === 'ALLOW' && $rule->direction === 'IN';
+    }
+
+    public function addRule(FirewallRule $rule): bool
+    {
+        if(!$this->isSupported($rule)) {
+            throw new Exception('Only inbound allow rules currently supported.');
+        }
+
+        return $this->allow($rule->source, $rule->port, $rule->protocol);
     }
 
     public function removeRule(FirewallRule $rule): bool
@@ -80,6 +97,25 @@ class Firewall
         return false;
     }
 
+    public function setStatus(bool $on): bool
+    {
+        return $on ? $this->enable() : $this->disable();
+    }
+
+    public function enable(): bool
+    {
+        return $this->processHook(
+            Enable::make()
+        );
+    }
+
+    public function disable(): bool
+    {
+        return $this->processHook(
+            Disable::make()
+        );
+    }
+
     public function loadRules(): static
     {
         $this->rules = static::getRules();
@@ -96,7 +132,7 @@ class Firewall
         }
 
         if ($process->failed) {
-            throw new \Exception(implode(PHP_EOL, $process->errorOutput()));
+            throw new Exception(implode(PHP_EOL, $process->errorOutput()));
         }
 
         return static::parseRules($output);

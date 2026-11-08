@@ -1,21 +1,30 @@
 <?php
 
-namespace App\Types;
+namespace App\Resources;
 
+use App\Contracts\Resource;
 use App\Enums\ProtocolType;
-use Illuminate\Contracts\Support\Jsonable;
-use Stringable;
 
 
-class Protocol implements Stringable, Jsonable
+class Protocol implements Resource
 {
+    public const bool RECURSE = false;
+
     protected function __construct(
         protected(set) ProtocolType $protocol,
     ) {}
 
-    public static function from(string $protocol): static
+    public static function from(mixed $from = null): ?static
     {
-        return match (strtolower($protocol)) {
+        if($from instanceof self) {
+            return $from;
+        }
+
+        if(!is_string($from)) {
+            return self::Empty();
+        }
+
+        return match (strtolower($from)) {
             'udp'                    => self::UDP(),
             'tcp'                    => self::TCP(),
             'any' | 'anywhere' | '*' => self::Any(),
@@ -76,5 +85,10 @@ class Protocol implements Stringable, Jsonable
     public function toJson($options = 0): string
     {
         return $this->toString();
+    }
+
+    public function toArray(): array
+    {
+        return ['protocol' => $this->protocol->value];
     }
 }

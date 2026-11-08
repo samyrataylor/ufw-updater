@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-use Illuminate\Contracts\Support\Jsonable;
+use App\Contracts\Resource;
 
 class JsonBuilder
 {
@@ -10,12 +10,12 @@ class JsonBuilder
     {
         $json = [];
         foreach ($data as $key => $value) {
-            if (is_object($value) && class_implements($value, Jsonable::class)) {
-                $value = $value->toJson($options);
-            }
-
             if (is_array($value)) {
                 $value = json_decode(self::toJson($value, $options), true);
+            }
+
+            if (is_object($value) && in_array(Resource::class,  class_implements($value))) {
+                $value = $value::RECURSE ? $value->toArray() : $value->toString();
             }
 
             $json[$key] = $value;

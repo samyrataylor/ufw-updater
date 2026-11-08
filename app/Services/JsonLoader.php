@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Contracts\Resource;
+use App\Resources\Protocol;
+use App\Resources\Setup;
 use App\Support\JsonBuilder;
 use App\Support\PathBuilder;
-use App\Types\Protocol;
 use Illuminate\Support\Arr;
 use Throwable;
 
@@ -19,6 +21,7 @@ class JsonLoader
         'remove_allow_any' => 'boolean',
         'protocol'         => Protocol::class,
         'port'             => 'integer',
+        'setup'            => Setup::class,
     ];
 
     public static function load(): array
@@ -56,6 +59,7 @@ class JsonLoader
             'remove_allow_any' => false,
             'protocol'         => Protocol::TCP(),
             'port'             => 22,
+            'setup'            => new Setup(),
         ];
     }
 
@@ -99,8 +103,12 @@ class JsonLoader
             return [$field => filter_var($value, FILTER_VALIDATE_INT)];
         }
 
-        if ($this->fields[$field] === Protocol::class) {
-            return [$field => Protocol::from($value)];
+        if (class_exists($this->fields[$field])) {
+            /** @var Resource $class */
+            $class = $this->fields[$field];
+            if (in_array(Resource::class, class_implements($class))) {
+                return [$field => $class::from($value)];
+            }
         }
 
         return [];

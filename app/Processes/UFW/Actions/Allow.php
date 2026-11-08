@@ -2,7 +2,7 @@
 
 namespace App\Processes\UFW\Actions;
 
-use App\Types\Protocol;
+use App\Resources\Protocol;
 
 class Allow extends UFWAction
 {

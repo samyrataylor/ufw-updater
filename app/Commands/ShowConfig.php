@@ -27,7 +27,8 @@ class ShowConfig extends Command
      */
     public function handle(): void
     {
-        $this->output->writeln(JsonLoader::instance()->toJson(JSON_PRETTY_PRINT));
+        $config = explode(PHP_EOL, JsonLoader::instance()->toJson(JSON_PRETTY_PRINT));
+        $this->output->writeln($config);
     }
 
     /**
