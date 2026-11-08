@@ -118,13 +118,7 @@ class FirewallRule implements Resource
     private function parseRawArray(array $elements): static
     {
         foreach($elements as $element) {
-            if(preg_match('/((\d+\/(tcp|udp))|Anywhere)/', $element, $matchProtoPort)) {
-                if($matchProtoPort[1] === 'Anywhere') {
-                    $this->port = 'any';
-                    $this->protocol = Protocol::Any();
-                    continue;
-                }
-
+            if(preg_match('/(\d+\/(tcp|udp))/', $element, $matchProtoPort)) {
                 $this->port = (int) explode('/', $matchProtoPort[1])[0];
                 $this->protocol = Protocol::from(explode('/', $matchProtoPort[1])[1]);
                 continue;
@@ -143,7 +137,7 @@ class FirewallRule implements Resource
                     continue;
                 }
 
-                if(strtolower($element) === 'any') {
+                if(strtolower($element) === 'any' || strtolower($element) === 'anywhere') {
                     if(!isset($this->port)) {
                         $this->port = 'any';
                         $this->protocol = Protocol::Any();
@@ -156,6 +150,7 @@ class FirewallRule implements Resource
                     }
 
                     $this->source = 'any';
+                    continue;
                 }
 
                 if(in_array(strtoupper($element), $this->policies)) {
