@@ -59,7 +59,7 @@ class JsonLoader
             'remove_allow_any' => false,
             'protocol'         => Protocol::TCP(),
             'port'             => 22,
-            'setup'            => new Setup(),
+            'setup'            => Setup::defaults(),
         ];
     }
 
@@ -134,7 +134,7 @@ class JsonLoader
         );
 
         try {
-            file_put_contents($this->configFile(), json_encode($config, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+            file_put_contents($this->configFile(), json_encode($config, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             return true;
         } catch (Throwable) {
             return false;

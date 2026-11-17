@@ -24,6 +24,15 @@ class Setup implements Resource
         }
     }
 
+    public static function defaults(): static
+    {
+        return new static([
+            'enable' => false,
+            'rules' => [],
+            'cron' => CronJobs::defaults(),
+        ]);
+    }
+
     protected function parse(array $setup): void
     {
         if(array_key_exists('enable', $setup)) {

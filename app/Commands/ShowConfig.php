@@ -2,8 +2,12 @@
 
 namespace App\Commands;
 
+use App\Resources\Protocol;
+use App\Resources\Setup;
 use App\Services\JsonLoader;
+use App\Support\JsonBuilder;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
 
 class ShowConfig extends Command
@@ -27,8 +31,15 @@ class ShowConfig extends Command
      */
     public function handle(): void
     {
-        $config = explode(PHP_EOL, JsonLoader::instance()->toJson(JSON_PRETTY_PRINT));
-        $this->output->writeln($config);
+        $this->showJson();
+    }
+
+    protected function showJson(): void
+    {
+        $json = JsonBuilder::toJson(config('settings'), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        foreach(explode(PHP_EOL, $json) as $line) {
+            $this->output->writeln($line);
+        }
     }
 
     /**

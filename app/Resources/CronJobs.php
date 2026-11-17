@@ -42,6 +42,11 @@ class CronJobs implements Resource
         return null;
     }
 
+    public static function defaults(): static
+    {
+        return new static();
+    }
+
     public function __toString(): string
     {
         return $this->toString();

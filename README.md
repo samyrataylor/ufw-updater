@@ -16,7 +16,7 @@ The config file is not published by default and will not touch your rules by def
 ./ufw-updater config:generate
 ```
 
-Generates `config.json` in the same directory as the application. 
+Generates `kconfig.json` in the same directory as the application. 
 
 #### Default config.json
 
@@ -27,7 +27,21 @@ Generates `config.json` in the same directory as the application.
     "remove_others": false,
     "remove_allow_any": false,
     "protocol": "tcp",
-    "port": 22
+    "port": 22,
+    "setup": {
+        "enable": true,
+        "rules": [],
+        "cron": {
+            "run": {
+                "install": true,
+                "schedule": "0 2 * * *"
+            },
+            "update": {
+                "install": true,
+                "schedule": "0 1 * * *"
+            }
+        }
+    }
 }
 ```
 
@@ -87,7 +101,7 @@ Integer of the port to manage UFW rules for. Will not touch others.
 ./ufw-updater config:show
 ```
 
-Displays the loaded config from `config.json` as JSON
+Displays the loaded config from `kconfig.json` as JSON
 
 ## Update Rules
 
